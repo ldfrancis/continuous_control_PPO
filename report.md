@@ -70,6 +70,7 @@ CLIP_EPSILON | float | for calculating the clipped ratio of current policy and o
 
 
 **Results**
+
 After training for 191 episodes, A mean score across all agents (averaged over the last 100 episodes) of 30.01 was attained.
 below is an image of the training progress, plots of scores and average scores attained at each episode.
 ![plots/score_plot.png](plots/score_plot.png)
