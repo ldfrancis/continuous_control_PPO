@@ -46,7 +46,7 @@ The clipped surrogate loss was implemented. First the policy ratio is computed (
 
 ## Training parameters
 
-Trading was done using an adam optimizer with a learning rate of 1e-5 for both the policy and critic with batch size of 64. Collected experiences were repeatedly used to train the agent for a number of times equal to EPOCHS. The parameters for training can be configured in the [config.py](config.py)
+Trading was done using an adam optimizer with a learning rate of 5e-5 for both the policy and critic with batch size of 64. Collected experiences were repeatedly used to train the agent for a number of times equal to EPOCHS. The parameters for training can be configured in the [config.py](config.py)
 
 Below is a description of the parameters found in [config.py](config.py).
 
