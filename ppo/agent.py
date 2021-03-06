@@ -1,24 +1,20 @@
-from collections import defaultdict
-from typing import Tuple
 import numpy as np
 import torch
-import torch.nn.functional as F
 
 import os
 
 from .model import Policy, Critic
-from .buffer import ReplayBuffer
-from config import LR, GAMMA, TAU, BATCH_SIZE, NUM_ACT, POLICY_LR, CRITIC_LR
+from config import POLICY_LR, CRITIC_LR, CLIP_EPSILON, ENTROPY_WEIGHT
 from pathlib import Path
 
 
 class PPO:
+    """PPO Agent"""
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     def __init__(self):
         self.policy = Policy()
         self.critic = Critic()
-        self.buffer = ReplayBuffer()
         self.policy_optimizer = torch.optim.Adam(self.policy.parameters(), lr=POLICY_LR)
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=CRITIC_LR)
 
@@ -26,68 +22,71 @@ class PPO:
         if Path("./checkpoint/checkpoint.pt").exists():
             self.restore("./checkpoint/checkpoint.pt")
 
-    def take_action(self, state:np.ndarray, train=False, epsilon=0):
-        # obtain q values
+    def take_action(self, state:np.ndarray):
         state = torch.FloatTensor(state[None, :]).to(PPO.device)
-        action, _ = self.policy(state)
+        self.policy.eval()
+        action, dist = self.policy(state)
 
-        return action
+        return action, dist
 
-        # obtain greedy action
-        max_action = np.argmax(q_vals.detach().cpu().numpy())
+    def compute_value(self, state:np.ndarray):
+        state = torch.FloatTensor(state[None, :]).to(PPO.device)
+        value = self.critic(state)
+        return value
 
-        # set probs for policy
-        non_greedy_prob = epsilon/NUM_ACT
-        greedy_prob = 1-(NUM_ACT-1)*non_greedy_prob
-        policy = [non_greedy_prob]*NUM_ACT
-        policy[max_action] = greedy_prob
+    def update(self, state:np.ndarray, action:np.ndarray, value:np.ndarray, log_prob:np.ndarray, return_:np.ndarray,
+               advantage:np.ndarray):
+        # convert to tensor
+        state = torch.FloatTensor(state).to(PPO.device)
+        action = torch.FloatTensor(action).to(PPO.device)
+        value = torch.FloatTensor(value).to(PPO.device)
+        log_prob = torch.FloatTensor(log_prob).to(PPO.device)
+        return_ = torch.FloatTensor(return_).to(PPO.device)
+        advantage = torch.FloatTensor(advantage).to(PPO.device)
 
-        # sample action
-        action = np.random.choice(NUM_ACT, 1, p=policy)
+        # policy ratio
+        _, dist = self.policy(state)
+        _log_prob = dist.log_prob(action)
+        ratio = (_log_prob-log_prob).exp()
 
-        # update q networks
-        if train:
-            self.update_q_networks()
-        return action
+        # policy loss
+        objective = ratio * advantage
+        clipped_objective = torch.clamp(ratio, 1-CLIP_EPSILON, 1+CLIP_EPSILON) * advantage
+        ppo_clip_objective = torch.min(objective,clipped_objective).mean()
+        entropy = dist.entropy().mean()
+        policy_loss = -(ppo_clip_objective + entropy*ENTROPY_WEIGHT)
 
-    def save_transition(self, transition:Tuple):
-        self.buffer.add(*transition)
+        # critic loss
+        _value = self.critic(state)
+        critic_loss = (return_ - _value).pow(2).mean()
 
-    def update_q_networks(self):
-        if len(self.buffer) < BATCH_SIZE:
-            return
-        state, action, rew, next_state, done = self.buffer.sample()
-        state = torch.FloatTensor(state).to(DQN.device)
-        action = torch.Tensor(action).long().to(DQN.device)
-        rew = torch.FloatTensor(rew).to(DQN.device)
-        next_state = torch.FloatTensor(next_state).to(DQN.device)
-        done = torch.from_numpy(done).float().to(DQN.device)
-        td_target = (rew + GAMMA*(1-done)*self.q_network_target(next_state).detach().max(-1)[0]).unsqueeze(-1)
-        q_val = self.q_network(state).gather(-1, action)
-        td_error = F.mse_loss(q_val, td_target)
-        self.optimizer.zero_grad()
-        td_error.backward()
-        self.optimizer.step()
+        # optimize
+        self.policy_optimizer.zero_grad()
+        policy_loss.backward()
+        self.policy_optimizer.step()
 
-        # update target network
-        for target_param, local_param in zip(self.q_network_target.parameters(), self.q_network.parameters()):
-            target_param.data.copy_(TAU * local_param.data + (1.0 - TAU) * target_param.data)
+        self.critic_optimizer.zero_grad()
+        critic_loss.backward()
+        self.critic_optimizer.step()
 
-    def save(self, path="./checkpoint"):
+        return critic_loss.item(), policy_loss.item()
+
+    def save(self, path:str="./checkpoint"):
         os.makedirs(path, exist_ok=True)
-        self.checkpoint_path = path
-        self.checkpoint_path_file = f"{path}/checkpoint.pt"
+        checkpoint_path_file = f"{path}/checkpoint.pt"
         torch.save({
-            'q_state_dict': self.q_network.state_dict(),
-            'q_target_state_dict': self.q_network_target.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            }, self.checkpoint_path_file )
+            'policy_state_dict': self.policy.state_dict(),
+            'critic_state_dict': self.critic.state_dict(),
+            'policy_optimizer_state_dict': self.policy_optimizer.state_dict(),
+            'critic_optimizer_state_dict': self.critic_optimizer.state_dict(),
+            }, checkpoint_path_file )
 
     def restore(self, path):
         checkpoint = torch.load(path)
-        self.q_network.load_state_dict(checkpoint['q_state_dict'])
-        self.q_network_target.load_state_dict(checkpoint['q_target_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.policy.load_state_dict(checkpoint['policy_state_dict'])
+        self.critic.load_state_dict(checkpoint['critic_state_dict'])
+        self.policy_optimizer.load_state_dict(checkpoint['policy_optimizer_state_dict'])
+        self.critic_optimizer.load_state_dict(checkpoint['critic_optimizer_state_dict'])
 
 
 

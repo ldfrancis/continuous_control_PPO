@@ -12,6 +12,7 @@ class ReacherEnv(gym.Env):
         action_size = int(self.brain.vector_action_space_size)
         self.action_space = gym.spaces.Box(-1, 1, (action_size,))
         self.observation_space = gym.spaces.Box(low=-1, high=1, shape=(37,))
+        self.num_agents = 20
 
     def reset(self, train_mode=True):
         env_info = self.unity_env.reset(train_mode=True)[self.brain_name]
@@ -30,3 +31,4 @@ class ReacherEnv(gym.Env):
 
     def render(self, mode='human'):
         pass
+
