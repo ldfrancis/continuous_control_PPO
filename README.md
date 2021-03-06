@@ -51,10 +51,10 @@ Evaluate a trained agent
 This would use the default configs specified in ```config.py```. The file config.py contains variables whose values are necessary to configure the environment, the dqn agent, and the experiment. Below is a sample setting for the variables in config.py
 ```
 ...
-ENV_PATH = f"./banana_env/{ENV_FILE}"
-NUM_OBS = 37
+ENV_PATH = f"./reacher_env/{ENV_FILE}"
+NUM_OBS = 33
 NUM_ACT = 4
-TARGET_SCORE = 13
+TARGET_SCORE = 30
 
 # ppo agent
 BATCH_SIZE = 64
