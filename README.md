@@ -1,5 +1,5 @@
-# continous_control_PPO
-*Continous control project for the udacity deep reinforcement learning nanodegree*
+# continuous_control_PPO
+*continuous control project for the udacity deep reinforcement learning nanodegree*
 
 This is the second project for the udacity deep reinforcement learning nanaodegree program. In this project the aim is to train an agent in an environment to perform a task of moving an arm to a target location and keeping it in this location throughout.
 
@@ -20,13 +20,13 @@ Clone the repository
 
 Change the current working directory to the projects base folder
 
-```cd navigation4banana```
+```cd continuous_control_PPO```
 
 Then proceed to installing the required packages by running
 
 ```pip install -r requirements.txt```
 
-Having installed all the required packages, the unity environment files can then be downloaded and placed in the banana_env folder. Below are links to download the unity environments for the popular operating systems;
+Having installed all the required packages, the unity environment files can then be downloaded and placed in the reacher_env folder. Below are links to download the unity environments for the popular operating systems;
 
 [linux](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Linux.zip) <br/>
 [mac](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher.app.zip) <br/>
@@ -48,7 +48,7 @@ Evaluate a trained agent
 
 ```python main.py test```
 
-This would use the default configs specified in ```config.py```. The file config.py contains variables whose values are necessary to configure the environment, the dqn agent, and the experiment. Below is a sample setting for the variables in config.py
+This would use the default configs specified in ```config.py```. The file config.py contains variables whose values are necessary to configure the environment, the agent, and the experiment. Below is a sample setting for the variables in config.py
 ```
 ...
 ENV_PATH = f"./reacher_env/{ENV_FILE}"
