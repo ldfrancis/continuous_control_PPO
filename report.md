@@ -48,7 +48,7 @@ The policy and critic models implementation can be found in [model.py](ppo/model
 The clipped surrogate loss was implemented. First the policy ratio is computed (current_policy/old_policy). A clipped version of this ratio is also computed using the CLIP_EPSILON parameter from [config.py](config.py) (clip(ratio, 1-CLIP_EPSILON, 1+CLIP_EPSILON)). With these ratios, two surrogate objectives are calculated and the minimum is taken as the objective. The surrogate loss is obtained by negating the sum of this objective and the entropy.
 
 
-##Training parameters
+## Training parameters
 
 Trading was done using an adam optimizer with a learning rate of 1e-5 for both the policy and critic with batch size of 64. Collected experiences were repeatedly used to train the agent for a number of times equal to EPOCHS. The parameters for training can be configured in the [config.py](config.py)
 
@@ -70,12 +70,12 @@ CRITIC_LR | float | learning rate for the critic optimizer
 CLIP_EPSILON | float | for calculating the clipped ratio of current policy and old policy
 
 
-##Results
+## Results
 
 After training for 191 episodes, A mean score across all agents (averaged over the last 100 episodes) of 30.01 was attained.
 below is an image of the training progress, plots of scores and average scores attained at each episode.
 ![plots/score_plot.png](plots/score_plot.png)
 
-##Possible Improvements
+## Possible Improvements
 
 For improvements over the current results, other settings of the hyper-parameters can be tried out. Also, other algorithms like, DDPG, A2C, can be explored.
