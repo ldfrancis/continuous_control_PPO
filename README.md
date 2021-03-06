@@ -37,3 +37,41 @@ Also, the PLATFORM variable in the config.py file has to be modified accordingly
 
 Now, all is set for the experiments
 
+## Instructions
+To run the experiment use the commands below:
+
+Train an agent in the environment;
+
+```python main.py train```
+
+Evaluate a trained agent
+
+```python main.py test```
+
+This would use the default configs specified in ```config.py```. The file config.py contains variables whose values are necessary to configure the environment, the dqn agent, and the experiment. Below is a sample setting for the variables in config.py
+```
+...
+ENV_PATH = f"./banana_env/{ENV_FILE}"
+NUM_OBS = 37
+NUM_ACT = 4
+TARGET_SCORE = 13
+
+# ppo agent
+BATCH_SIZE = 64
+GAMMA = 0.9
+LAMBDA = 0.8
+POLICY_HIDDEN_DIM = [64, 32]
+CRITIC_HIDDEN_DIM = [64, 32]
+MAX_LOG_STD = 0
+MIN_LOG_STD = -20
+ENTROPY_WEIGHT = 0.005
+EPOCHS = 10
+POLICY_LR = 5e-5
+CRITIC_LR = 5e-5
+CLIP_EPSILON = 0.2
+```
+
+The experiment would continue running for several episodes till the agent achieves a score of 30 averaged over the last 100 episodes.
+
+## Report
+A report containing the results can be found [here](report.md)
