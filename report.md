@@ -10,11 +10,7 @@ behave optimally.
 
 To solve the environment, A PPO agent was implemented and trained in the environment till it achieved an average score 
 (across all 20 agents) of over 30. The implementation involving the clipped surrogate loss, as explained in the lessons,
-was used, and the results were impressive. The result achieved with the PPO agent is outlined below;
-
-Episodes | average score (last 100 episodes) | evaluation score
---- | --- | ---
-191 | 30.01 | 35.09
+was used, and the results were impressive. 
 
 ## PPO Agent
 A PPO agent has a policy which it tries to optimize using experiences from the environment using that policy, and with 
@@ -74,7 +70,14 @@ CLIP_EPSILON | float | for calculating the clipped ratio of current policy and o
 
 After training for 191 episodes, A mean score across all agents (averaged over the last 100 episodes) of 30.01 was attained.
 below is an image of the training progress, plots of scores and average scores attained at each episode.
+
 ![plots/score_plot.png](plots/score_plot.png)
+
+The result achieved with the PPO agent is outlined below;
+
+Episodes | average score (last 100 episodes) | evaluation score
+--- | --- | ---
+191 | 30.01 | 35.09
 
 ## Possible Improvements
 
